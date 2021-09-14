@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import threading
 from typing import Union
-import cv2
 import av
 import mediapipe as mp
 import csv
