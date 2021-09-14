@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import threading
 from typing import Union
+import cv2
 import av
 import mediapipe as mp
 import csv
@@ -44,20 +45,20 @@ cy = 480
 # with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:#high confidence - too high, you may not be able to track
 # Before pusing to Heroku this segment below will be changed to CONFIG file in Heroku
 
-load_dotenv('.env')
+# load_dotenv('.env')
 
-aws3 = boto3.resource(
-    service_name='s3',
-    aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-    aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY')
-)
-
-#code below for Heroku test
 # aws3 = boto3.resource(
 #     service_name='s3',
-#     aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
-#     aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY')
+#     aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+#     aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY')
 # )
+
+code below for Heroku test
+aws3 = boto3.resource(
+    service_name='s3',
+    aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
+    aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY')
+)
 
 
 aws3.Bucket('movev1').download_file(Key='finalise_model.sav', Filename=model_name) #check if exist
