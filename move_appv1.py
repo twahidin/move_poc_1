@@ -52,8 +52,8 @@ cy = 480
 #     aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
 #     aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY')
 # )
+#code below for Heroku test
 
-code below for Heroku test
 aws3 = boto3.resource(
     service_name='s3',
     aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
