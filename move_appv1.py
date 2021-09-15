@@ -18,7 +18,7 @@ WEBRTC_CLIENT_SETTINGS = ClientSettings(
 
 
 
-class VideoTransformer(VideoProcessorBase):
+class OpenCVVideoProcessor(VideoProcessorBase):
     def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
             in_image = frame.to_ndarray(format="bgr24")
 
@@ -30,7 +30,7 @@ webrtc_ctx = webrtc_streamer(
         key="opencv-filter",
         mode=WebRtcMode.SENDRECV,
         client_settings=WEBRTC_CLIENT_SETTINGS,
-        video_transformer_factory=OpenCVVideoTransformer,
+        video_processor_factory=OpenCVVideoProcessor,
         async_transform=True,
     )
 
