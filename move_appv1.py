@@ -1,16 +1,17 @@
 import cv2
 import av
-from streamlit_webrtc import VideoProcessorBase, webrtc_streamer
+from streamlit_webrtc import VideoTransformerBase, webrtc_streamer
 
 
-class VideoTransformer(VideoProcessorBase):
-    def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
-        
-        in_image = frame.to_ndarray(format="bgr24")
-        
-        return av.VideoFrame.from_ndarray(in_image, format="bgr24")
+class VideoTransformer(VideoTransformerBase):
+    def transform(self, frame):
+        img = frame.to_ndarray(format="bgr24")
 
-webrtc_streamer(key="example", video_processor_factory=VideoTransformer)
+        img = cv2.cvtColor(cv2.Canny(img, 100, 200), cv2.COLOR_GRAY2BGR)
+
+        return img
+
+webrtc_streamer(key="example", video_transformer_factory=VideoTransformer)
 
 
 
