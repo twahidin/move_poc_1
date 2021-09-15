@@ -1,6 +1,15 @@
 import cv2
 import av
-from streamlit_webrtc import VideoProcessorBase, webrtc_streamer
+import streamlit as st
+
+
+from streamlit_webrtc import (
+    AudioProcessorBase,
+    ClientSettings,
+    VideoProcessorBase,
+    WebRtcMode,
+    webrtc_streamer,
+)
 
 WEBRTC_CLIENT_SETTINGS = ClientSettings(
     rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
