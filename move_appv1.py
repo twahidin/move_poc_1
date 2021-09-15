@@ -10,8 +10,8 @@ import av
 import mediapipe as mp
 import csv
 import os
-import boto3
-from boto.s3.connection import S3Connection
+#import boto3
+#from boto.s3.connection import S3Connection
 import time
 from dotenv import load_dotenv
 from PIL import Image
