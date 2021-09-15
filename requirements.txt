@@ -12,9 +12,6 @@ backports.zoneinfo==0.2.1
 base58==2.1.0
 bleach==4.1.0
 blinker==1.4
-boto==2.49.0
-boto3==1.18.36
-botocore==1.21.36
 cachetools==4.2.2
 certifi==2021.5.30
 cffi==1.14.6
