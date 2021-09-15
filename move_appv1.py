@@ -6,6 +6,7 @@ import pandas as pd
 import threading
 from typing import Union
 import cv2
+import s3fs
 import av
 import mediapipe as mp
 import csv
@@ -54,15 +55,31 @@ cy = 480
 # )
 
 #code below for Heroku test
-aws3 = boto3.resource(
-    service_name='s3',
-    aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
-    aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY')
-)
 
 
-aws3.Bucket('movev1').download_file(Key='finalise_model.sav', Filename=model_name) #check if exist
-aws3.Bucket('movev1').download_file(Key='coords.csv', Filename=cords) #check if exist
+
+# aws3 = boto3.resource(
+#     service_name='s3',
+#     aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
+#     aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY')
+# )
+
+fs = s3fs.S3FileSystem(anon=False)
+
+@st.cache(ttl=600)
+def read_file(filename):
+    with fs.open(filename) as f:
+        return f
+
+#file = read_file("movev1/finalise_model.sav")
+
+
+
+#fs.download("movev1/finalise_model.csv", model_name)
+#cords = fs.download_file("movev1/coords.csv")
+
+#aws3.Bucket('movev1').download_file(Key='finalise_model.sav', Filename=model_name) #check if exist
+#aws3.Bucket('movev1').download_file(Key='coords.csv', Filename=cords) #check if exist
 
 #function declaration
 def calculate_angle(a,b,c): #calculation of the angles of the joints
@@ -112,7 +129,7 @@ with st.sidebar.form("User Credentials"):
 
 
 
-model = pickle.load(open(model_name, 'rb'))
+#model = pickle.load(open(model_name, 'rb'))
 
 pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
 
