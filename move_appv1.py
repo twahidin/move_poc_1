@@ -1,20 +1,29 @@
 import cv2
 import av
-from streamlit_webrtc import VideoTransformerBase, webrtc_streamer
+from streamlit_webrtc import VideoProcessorBase, webrtc_streamer
 
-
-class VideoTransformer(VideoTransformerBase):
-    def transform(self, frame):
-        img = frame.to_ndarray(format="bgr24")
-
-        img = cv2.cvtColor(cv2.Canny(img, 100, 200), cv2.COLOR_GRAY2BGR)
-
-        return img
-
-webrtc_streamer(key="example", video_transformer_factory=VideoTransformer)
+WEBRTC_CLIENT_SETTINGS = ClientSettings(
+    rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
+    media_stream_constraints={"video": True, "audio": False},
+)
 
 
 
+class VideoTransformer(VideoProcessorBase):
+    def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
+            in_image = frame.to_ndarray(format="bgr24")
+
+
+            return av.VideoFrame.from_ndarray(in_image, format="bgr24")
+
+
+webrtc_ctx = webrtc_streamer(
+        key="opencv-filter",
+        mode=WebRtcMode.SENDRECV,
+        client_settings=WEBRTC_CLIENT_SETTINGS,
+        video_transformer_factory=OpenCVVideoTransformer,
+        async_transform=True,
+    )
 
 
 
