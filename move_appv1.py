@@ -52,8 +52,8 @@ cy = 480
 #     aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
 #     aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY')
 # )
-#code below for Heroku test
 
+#code below for Heroku test
 aws3 = boto3.resource(
     service_name='s3',
     aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
@@ -119,34 +119,41 @@ pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
 
 def main():
     class VideoTransformer(VideoProcessorBase):
-        # frame_lock: threading.Lock  # `transform()` is running in another thread, then a lock object is used here for thread-safety.
-        # in_image: Union[np.ndarray, None]
+        frame_lock: threading.Lock  # `transform()` is running in another thread, then a lock object is used here for thread-safety.
+        in_image: Union[np.ndarray, None]
 
         def __init__(self) -> None:
-            # self.frame_lock = threading.Lock()
+            self.frame_lock = threading.Lock()
             self.in_image = None
             self.row = None
 
         def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
             in_image = frame.to_ndarray(format="bgr24")
+
+            global img_counter
+
             results = pose.process(in_image)
+
             mp_drawing.draw_landmarks(in_image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS, 
                                      mp_drawing.DrawingSpec(color=(245,117,66), thickness=2, circle_radius=4),
                                      mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2)
                                      )
+            
+
             try:
                 pose_row = results.pose_landmarks
                 if pose_row is not None:
                     row = list(np.array([[landmark.x, landmark.y, landmark.z, landmark.visibility] for landmark in pose_row.landmark]).flatten())
-                    self.row = row
+
                 pass
             except Exception as e:
                 raise e
             else:
                 pass
 
-            # with self.frame_lock:
-            self.in_image = in_image
+            with self.frame_lock:
+                self.in_image = in_image
+                self.row = row
             return av.VideoFrame.from_ndarray(in_image, format="bgr24")
 
     ctx = webrtc_streamer(key="snapshot", video_processor_factory=VideoTransformer)
@@ -166,13 +173,14 @@ def main():
             st.header("Move !!!")    
         while img_counter > 0:
             if ctx.video_processor:           
-                in_image = ctx.video_processor.in_image
-                row = ctx.video_processor.row
-                img_list.append(in_image)
-                row_list.append(row)
-                #st.write(str(img_counter))
-                if in_image is None: 
-                    st.warning("No frames available yet.")
+                with ctx.video_processor.frame_lock:
+                    in_image = ctx.video_processor.in_image
+                    row = ctx.video_processor.row
+                    img_list.append(in_image)
+                    row_list.append(row)
+                    #st.write(str(img_counter))
+                    if in_image is None: 
+                        st.warning("No frames available yet.")
             img_counter -= 1
             if s_option == 'Slow':
                 time.sleep(0.5)
