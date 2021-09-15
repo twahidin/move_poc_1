@@ -11,8 +11,8 @@ import av
 import mediapipe as mp
 import csv
 import os
-import boto3
-from boto.s3.connection import S3Connection
+# import boto3
+# from boto.s3.connection import S3Connection
 from streamlit_webrtc import VideoProcessorBase, webrtc_streamer
 import time
 from dotenv import load_dotenv
@@ -29,9 +29,9 @@ import pickle
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 #model_name = './data/finalise_model.sav' #sports name can be changed with s_option
-#model_name = './data/finalise_model.sav' #sports name can be changed with s_option
-cords = 'crds.csv'
-model_name = 'model.sav'
+model_name = './data/finalise_model.sav' #sports name can be changed with s_option
+# cords = 'crds.csv'
+# model_name = 'model.sav'
 
 
 a_model = ''
@@ -64,12 +64,12 @@ cy = 480
 #     aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY')
 # )
 
-fs = s3fs.S3FileSystem(anon=False)
+#fs = s3fs.S3FileSystem(anon=False)
 
-@st.cache(ttl=600)
-def read_file(filename):
-    with fs.open(filename) as f:
-        return f
+# @st.cache(ttl=600)
+# def read_file(filename):
+#     with fs.open(filename) as f:
+#         return f
 
 #file = read_file("movev1/finalise_model.sav")
 
