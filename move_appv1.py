@@ -136,43 +136,35 @@ pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
 
 def main():
     class VideoTransformer(VideoProcessorBase):
-        frame_lock: threading.Lock  # `transform()` is running in another thread, then a lock object is used here for thread-safety.
-        in_image: Union[np.ndarray, None]
+        # frame_lock: threading.Lock  # `transform()` is running in another thread, then a lock object is used here for thread-safety.
+        # in_image: Union[np.ndarray, None]
 
         def __init__(self) -> None:
-            self.frame_lock = threading.Lock()
+            # self.frame_lock = threading.Lock()
             self.in_image = None
             self.row = None
 
         def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
             in_image = frame.to_ndarray(format="bgr24")
-
-            global img_counter
-
             results = pose.process(in_image)
-
             mp_drawing.draw_landmarks(in_image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS, 
                                      mp_drawing.DrawingSpec(color=(245,117,66), thickness=2, circle_radius=4),
                                      mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2)
                                      )
-            
-
             try:
                 pose_row = results.pose_landmarks
                 if pose_row is not None:
                     row = list(np.array([[landmark.x, landmark.y, landmark.z, landmark.visibility] for landmark in pose_row.landmark]).flatten())
-
+                    self.row = row
                 pass
             except Exception as e:
                 raise e
             else:
                 pass
 
-            with self.frame_lock:
-                self.in_image = in_image
-                self.row = row
+            # with self.frame_lock:
+            self.in_image = in_image
             return av.VideoFrame.from_ndarray(in_image, format="bgr24")
-
     ctx = webrtc_streamer(key="snapshot", video_processor_factory=VideoTransformer)
    
     if st.button("Analyse"):
