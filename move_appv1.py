@@ -19,7 +19,7 @@ from sklearn.metrics import accuracy_score # Accuracy metrics
 import pickle
 from streamlit_webrtc import (
     AudioProcessorBase,
-    ClientSettings,
+    RTCConfiguration,
     VideoProcessorBase,
     WebRtcMode,
     webrtc_streamer,
@@ -32,9 +32,8 @@ mp_pose = mp.solutions.pose
 model_name = './data/model.sav' #sports name can be changed with s_option
 X = ''
 
-WEBRTC_CLIENT_SETTINGS = ClientSettings(
-    rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
-    media_stream_constraints={"video": True, "audio": False},
+RTC_CONFIGURATION = RTCConfiguration(
+    {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
 )
 
 # with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:#high confidence - too high, you may not be able to track
@@ -92,6 +91,10 @@ class_df = pd.DataFrame({
     'third column': ['1', '2', '3', '4', '5'],
     })
 
+stream_df = pd.DataFrame({
+  'str column': ['Express', 'Normal Academic', 'Normal Tech'],
+  })
+
 
 #sports option in side bar
 s_option = st.sidebar.selectbox( 
@@ -99,9 +102,12 @@ s_option = st.sidebar.selectbox(
     df['first column'])
 
 with st.sidebar.form("User Credentials"):
+    class_code = st.text_input('Enter class code:')
     name = st.text_input('Enter your name:')
     age = st.slider('How old are you?', min_value = 12, max_value = 17, value = 15, step=1)
+    gender = st.radio('Gender;',('Male','Female'))
     level = st.selectbox('Select your level:',class_df['sec column'])
+    stream = st.selectbox('Select your stream:', stream_df['str column'])
     class_no = st.selectbox('Select your class:',class_df['third column'])
     submit_button = st.form_submit_button()
 
@@ -138,7 +144,22 @@ def main():
                 pose_row = results.pose_landmarks
                 if pose_row is not None:
                     row = list(np.array([[landmark.x, landmark.y, landmark.z, landmark.visibility] for landmark in pose_row.landmark]).flatten())
-
+                #     X = pd.DataFrame([row])
+                #     #print(X)
+                #     #st.text(X)
+                #     body_language_class = model.predict(X)[0]
+                #     body_language_prob = model.predict_proba(X)[0]
+                #     # Grab ear coords ( Optional but it slows things down )
+                #     cv2.putText(in_image, 'CLASS'
+                #             , (95,12), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
+                #     cv2.putText(in_image, body_language_class.split(' ')[0]
+                #             , (90,40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+                
+                # # Display Probability
+                #     cv2.putText(in_image, 'PROB'
+                #             , (15,12), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
+                #     in_image = cv2.putText(in_image, str(round(body_language_prob[np.argmax(body_language_prob)],2))
+                #             , (10,40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
                 pass
             except Exception as e:
                 raise e
@@ -147,15 +168,16 @@ def main():
 
             with self.frame_lock:
                 self.in_image = in_image
-                self.row = row
+                if row is not None:
+                    self.row = row
             return av.VideoFrame.from_ndarray(in_image, format="bgr24")
 
     ctx = webrtc_streamer(
         key="opencv-filter",
         mode=WebRtcMode.SENDRECV,
-        client_settings=WEBRTC_CLIENT_SETTINGS,
+        rtc_configuration=RTC_CONFIGURATION,
         video_processor_factory=OpenCVVideoProcessor,
-        async_transform=True,
+        async_processing=True,
     )
 
    
